@@ -2,16 +2,27 @@ import React, { useState } from "react";
 import car from "./assets/car.png";
 import "./index.css";
 
-const CarAnimation: React.FC = () => {
-  const [moving, setMoving] = useState(false);
-  const [reverse, setReverse] = useState(false);
+interface CarState {
+  moving: boolean;
+  reverse: boolean;
+}
 
-  const toggleMove = () => {
-    setMoving(!moving);
+const CarAnimation: React.FC = () => {
+  const [carState, setCarState] = useState<CarState>({ moving: false, reverse: false });
+
+  const toggleMove = (): void => {
+    setCarState(prev => ({ ...prev, moving: !prev.moving }));
   };
 
-  const toggleDirection = () => {
-    setReverse(!reverse);
+  const toggleDirection = (): void => {
+    setCarState(prev => ({ ...prev, reverse: !prev.reverse }));
+  };
+
+  const getCarClassName = (): string => {
+    const { moving, reverse } = carState;
+    const baseClass = "car";
+    const animationClass = moving ? (reverse ? "move-reverse" : "move") : "";
+    return `${baseClass} ${animationClass}`.trim();
   };
 
   return (
@@ -21,17 +32,17 @@ const CarAnimation: React.FC = () => {
       <div className="road">
         <img
           src={car}
-          alt="car"
-          className={`car ${moving ? (reverse ? "move-reverse" : "move") : ""}`}
+          alt="Car animation"
+          className={getCarClassName()}
         />
       </div>
 
       <div className="controls">
-        <button className="start-btn" onClick={toggleMove}>
-          {moving ? "Stop Car" : "Start Car"}
+        <button className="start-btn" onClick={toggleMove} aria-label={carState.moving ? "Stop the car" : "Start the car"}>
+          {carState.moving ? "Stop Car" : "Start Car"}
         </button>
-        <button className="direction-btn" onClick={toggleDirection}>
-          {reverse ? "Go Forward" : "Go Backward"}
+        <button className="direction-btn" onClick={toggleDirection} aria-label={carState.reverse ? "Move car forward" : "Move car backward"}>
+          {carState.reverse ? "Go Forward" : "Go Backward"}
         </button>
       </div>
     </div>
@@ -39,4 +50,3 @@ const CarAnimation: React.FC = () => {
 };
 
 export default CarAnimation;
-
