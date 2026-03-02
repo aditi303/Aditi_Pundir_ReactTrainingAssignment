@@ -12,7 +12,7 @@ interface CartItem extends Product {
   quantity: number
 }
 
-const products: Product[] = [
+const PRODUCTS: Product[] = [
   { id: 1, name: 'Laptop', price: 999, image: '💻' },
   { id: 2, name: 'Smartphone', price: 699, image: '📱' },
   { id: 3, name: 'Headphones', price: 199, image: '🎧' },
@@ -30,47 +30,47 @@ const products: Product[] = [
 function App() {
   const [cart, setCart] = useState<CartItem[]>([])
 
-  const formatPrice = (amount: number) =>
+  const formatPrice = (amount: number): string =>
     new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
     }).format(amount)
 
-  const addToCart = (product: Product) => {
-    const existing = cart.find(item => item.id === product.id)
-    if (existing) {
-      setCart(
-        cart.map(item =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        )
-      )
+  const addToCart = (product: Product): void => {
+    const existingItem = cart.find(item => item.id === product.id)
+    
+    if (existingItem) {
+      setCart(cart.map(item =>
+        item.id === product.id
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      ))
     } else {
       setCart([...cart, { ...product, quantity: 1 }])
     }
   }
 
-  const removeFromCart = (id: number) => {
+  const removeFromCart = (id: number): void => {
     setCart(cart.filter(item => item.id !== id))
   }
 
-  const updateQuantity = (id: number, quantity: number) => {
+  const updateQuantity = (id: number, quantity: number): void => {
     if (quantity <= 0) {
       removeFromCart(id)
     } else {
-      setCart(
-        cart.map(item =>
-          item.id === id ? { ...item, quantity } : item
-        )
-      )
+      setCart(cart.map(item =>
+        item.id === id ? { ...item, quantity } : item
+      ))
     }
   }
 
-  const total = cart.reduce(
+  const cartTotal = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   )
+
+  const isProductInCart = (productId: number): boolean => 
+    cart.some(item => item.id === productId)
 
   return (
     <div className="app-container">
@@ -82,26 +82,22 @@ function App() {
         <div className="products-section">
           <h3>Products</h3>
           <div className="products-grid">
-            {products.map(product => {
-              const inCart = cart.some(item => item.id === product.id)
-
-              return (
-                <div key={product.id} className="product-card">
-                  <div className="product-image">{product.image}</div>
-                  <h3>{product.name}</h3>
-                  <p className="product-price">
-                    {formatPrice(product.price)}
-                  </p>
-                  <button
-                    className="add-to-cart-btn"
-                    onClick={() => addToCart(product)}
-                    disabled={inCart}
-                  >
-                    {inCart ? 'Added' : 'Add to Cart'}
-                  </button>
-                </div>
-              )
-            })}
+            {PRODUCTS.map(product => (
+              <div key={product.id} className="product-card">
+                <div className="product-image">{product.image}</div>
+                <h3>{product.name}</h3>
+                <p className="product-price">
+                  {formatPrice(product.price)}
+                </p>
+                <button
+                  className="add-to-cart-btn"
+                  onClick={() => addToCart(product)}
+                  disabled={isProductInCart(product.id)}
+                >
+                  {isProductInCart(product.id) ? 'Added' : 'Add to Cart'}
+                </button>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -159,7 +155,7 @@ function App() {
               <div className="cart-summary">
                 <div className="summary-row total-row">
                   <span>Total:</span>
-                  <span>{formatPrice(total)}</span>
+                  <span>{formatPrice(cartTotal)}</span>
                 </div>
               </div>
             </>
@@ -171,4 +167,3 @@ function App() {
 }
 
 export default App
-
